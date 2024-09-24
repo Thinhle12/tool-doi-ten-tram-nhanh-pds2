@@ -11,20 +11,23 @@ try:
     with open(input_file, 'r') as file:
         lines = file.readlines()
 
-    # Biến cờ hiệu để xác định khi nào cần thay thế tên trạm điện
-    replace_next = False
-
-    # Duyệt qua các dòng trong file
+    # Duyệt qua các dòng trong file để tìm SCADA ID
     for i, line in enumerate(lines):
         # Kiểm tra dòng chứa SCADA ID
-        if f'record_key("{scada_id}")' in line:
-            replace_next = True
-        # Nếu dòng trước có chứa SCADA ID, tìm dòng tên trạm và thay thế
-        elif replace_next and 'record("SUBSTN")' in line:
-            # Giữ nguyên khoảng cách đầu dòng và thay thế tên trạm điện
-            indent = line[:line.find('record("SUBSTN")')]
-            lines[i] = f'{indent}record("SUBSTN") record_key("{new_substation_name}")\n'
-            replace_next = False
+        if f'record("DEVICE") record_key("{scada_id}")' in line:
+            # Dịch chuyển lên 3 dòng để xác định dòng record("SUBSTN")
+            substation_line_index = i - 3
+
+            # Kiểm tra xem có đủ dòng để dịch chuyển không
+            if substation_line_index >= 0 and 'record("SUBSTN")' in lines[substation_line_index]:
+                # Giữ nguyên định dạng và thay thế tên trạm điện
+                original_line = lines[substation_line_index]
+                # Tìm vị trí record_key và thay thế tên trạm điện
+                updated_line = original_line.split('record_key("')[0] + f'record_key("{new_substation_name}")\n'
+                lines[substation_line_index] = updated_line
+            else:
+                print("Không tìm thấy dòng record('SUBSTN') ở vị trí mong đợi.")
+            break
 
     # Ghi nội dung đã chỉnh sửa vào file .ddl mới
     with open(output_file, 'w') as file:
