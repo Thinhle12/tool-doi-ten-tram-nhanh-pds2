@@ -16,7 +16,7 @@ try:
         # Kiểm tra dòng chứa SCADA ID
         if f'record("DEVICE") record_key("{scada_id}")' in line:
             # Dịch chuyển lên 3 dòng để xác định dòng record("SUBSTN")
-            substation_line_index = i - 3
+            substation_line_index = i - 2
 
             # Kiểm tra xem có đủ dòng để dịch chuyển không
             if substation_line_index >= 0 and 'record("SUBSTN")' in lines[substation_line_index]:
@@ -27,7 +27,7 @@ try:
                 lines[substation_line_index] = updated_line
             else:
                 print("Không tìm thấy dòng record('SUBSTN') ở vị trí mong đợi.")
-            break
+            
 
     # Ghi nội dung đã chỉnh sửa vào file .ddl mới
     with open(output_file, 'w') as file:
