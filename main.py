@@ -29,6 +29,9 @@ def run_program():
             config_data = [(row['scada id'].strip(), row['substation'].strip()) for row in reader]
 
         files_processed = []
+        total_files = len([f for f in os.listdir(input_dir) if f.endswith('.ddl')])
+        progress_bar["maximum"] = total_files
+        processed_files_count = 0
 
         # Duyệt qua tất cả các file .ddl trong thư mục input
         for input_filename in os.listdir(input_dir):
@@ -61,6 +64,9 @@ def run_program():
                     file.writelines(lines)
 
                 files_processed.append(input_filename)
+                processed_files_count += 1
+                progress_bar["value"] = processed_files_count
+                root.update_idletasks()
 
         log_message("Đã xử lý xong tất cả các file.")
 
@@ -82,13 +88,10 @@ def log_message(message):
 # Tạo giao diện GUI với tkinter
 root = tk.Tk()
 root.title("tool doi ten tram PDS2")
+root.geometry("500x500")
 
 # Logo của chương trình
-logo = Image.open("tool.png")
-logo = logo.resize((100, 100), Image.Resampling.LANCZOS)
-logo_img = ImageTk.PhotoImage(logo)
-logo_label = tk.Label(root, image=logo_img)
-logo_label.pack(pady=10)
+root.iconbitmap("tool.ico")
 
 # Nút "Run"
 run_button = tk.Button(root, text="Run", command=run_program, font=("Arial", 12), bg='green', fg='white')
@@ -99,7 +102,7 @@ progress_label = tk.Label(root, text="Chương trình đang sẵn sàng.", font=
 progress_label.pack(pady=5)
 
 # Thanh loading
-progress_bar = ttk.Progressbar(root, orient="horizontal", length=300, mode="indeterminate")
+progress_bar = ttk.Progressbar(root, orient="horizontal", length=300, mode="determinate")
 progress_bar.pack(pady=5)
 
 # Vùng hiển thị trạng thái
