@@ -32,6 +32,9 @@ def run_program():
             messagebox.showwarning("Thông báo", "Vui lòng bỏ file .ddl vào thư mục input và mở lại chương trình.")
             log_message("Không tìm thấy file .ddl trong thư mục input.")
             return
+        else:
+            # Xóa dòng trạng thái nếu người dùng chạy lại chương trình và có file .ddl trong input
+            status_label.config(text="")  # Xóa thông báo cũ
 
         # Đọc file config.csv để lấy các cặp scada_id và new_substation_name
         with open(config_file, mode='r') as csvfile:
