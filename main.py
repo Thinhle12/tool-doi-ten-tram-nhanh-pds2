@@ -109,7 +109,7 @@ def log_message(message):
 # Tạo giao diện GUI với tkinter
 root = tk.Tk()
 root.title("tool doi ten tram PDS2")
-root.geometry("400x400")
+root.geometry("400x200")
 
 # Logo của chương trình
 root.iconbitmap("tool.ico")
