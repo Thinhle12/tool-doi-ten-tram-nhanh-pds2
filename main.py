@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
+import time
 
 # Hàm xử lý chính
 def run_program():
@@ -65,8 +66,7 @@ def run_program():
 
                 files_processed.append(input_filename)
                 processed_files_count += 1
-                progress_bar["value"] = processed_files_count
-                root.update_idletasks()
+                smooth_progress_bar(processed_files_count)
 
         log_message("Đã xử lý xong tất cả các file.")
 
@@ -80,6 +80,16 @@ def run_program():
     except Exception as e:
         log_message(f"Đã xảy ra lỗi: {e}")
 
+# Hàm để cập nhật thanh progress bar mượt mà
+def smooth_progress_bar(value):
+    current_value = progress_bar["value"]
+    step = (value - current_value) / 20  # Tăng dần giá trị mỗi lần cập nhật
+    for i in range(20):
+        current_value += step
+        progress_bar["value"] = current_value
+        root.update_idletasks()
+        time.sleep(0.02)  # Giảm tốc độ để tạo hiệu ứng mượt mà
+
 # Hàm để ghi trạng thái vào giao diện
 def log_message(message):
     status_label.config(text=message)
@@ -88,7 +98,7 @@ def log_message(message):
 # Tạo giao diện GUI với tkinter
 root = tk.Tk()
 root.title("tool doi ten tram PDS2")
-root.geometry("500x500")
+root.geometry("400x400")
 
 # Logo của chương trình
 root.iconbitmap("tool.ico")
