@@ -24,49 +24,57 @@ def run_program():
             os.makedirs(output_dir)
             log_message(f"Đã tạo thư mục: {output_dir}")
 
+        # Lấy danh sách các file .ddl trong thư mục input
+        ddl_files = [f for f in os.listdir(input_dir) if f.endswith('.ddl')]
+        
+        # Nếu không có file .ddl nào trong thư mục input, hiển thị thông báo và dừng chương trình
+        if not ddl_files:
+            messagebox.showwarning("Thông báo", "Vui lòng bỏ file .ddl vào thư mục input và mở lại chương trình.")
+            log_message("Không tìm thấy file .ddl trong thư mục input.")
+            return
+
         # Đọc file config.csv để lấy các cặp scada_id và new_substation_name
         with open(config_file, mode='r') as csvfile:
             reader = csv.DictReader(csvfile)
             config_data = [(row['scada id'].strip(), row['substation'].strip()) for row in reader]
 
         files_processed = []
-        total_files = len([f for f in os.listdir(input_dir) if f.endswith('.ddl')])
+        total_files = len(ddl_files)
         progress_bar["maximum"] = total_files
         processed_files_count = 0
 
         # Duyệt qua tất cả các file .ddl trong thư mục input
-        for input_filename in os.listdir(input_dir):
-            if input_filename.endswith('.ddl'):
-                input_file_path = os.path.join(input_dir, input_filename)
-                output_file_path = os.path.join(output_dir, f"{os.path.splitext(input_filename)[0]}_done.ddl")
+        for input_filename in ddl_files:
+            input_file_path = os.path.join(input_dir, input_filename)
+            output_file_path = os.path.join(output_dir, f"{os.path.splitext(input_filename)[0]}_done.ddl")
 
-                # Đọc nội dung file .ddl
-                with open(input_file_path, 'r') as file:
-                    lines = file.readlines()
+            # Đọc nội dung file .ddl
+            with open(input_file_path, 'r') as file:
+                lines = file.readlines()
 
-                # Duyệt qua từng cặp scada_id và new_substation_name trong config.csv
-                for scada_id, new_substation_name in config_data:
-                    # Hiển thị tiến trình
-                    progress_label.config(text=f"Đang xử lý file {input_filename}, SCADA ID: {scada_id}")
-                    root.update_idletasks()
+            # Duyệt qua từng cặp scada_id và new_substation_name trong config.csv
+            for scada_id, new_substation_name in config_data:
+                # Hiển thị tiến trình
+                progress_label.config(text=f"Đang xử lý file {input_filename}, SCADA ID: {scada_id}")
+                root.update_idletasks()
 
-                    # Duyệt qua tất cả các dòng trong file .ddl để tìm SCADA ID
-                    for i, line in enumerate(lines):
-                        if f'record("DEVICE") record_key("{scada_id}")' in line:
-                            substation_line_index = i - 2
+                # Duyệt qua tất cả các dòng trong file .ddl để tìm SCADA ID
+                for i, line in enumerate(lines):
+                    if f'record("DEVICE") record_key("{scada_id}")' in line:
+                        substation_line_index = i - 2
 
-                            if substation_line_index >= 0 and 'record("SUBSTN")' in lines[substation_line_index]:
-                                original_line = lines[substation_line_index]
-                                updated_line = original_line.split('record_key("')[0] + f'record_key("{new_substation_name}")\n'
-                                lines[substation_line_index] = updated_line
+                        if substation_line_index >= 0 and 'record("SUBSTN")' in lines[substation_line_index]:
+                            original_line = lines[substation_line_index]
+                            updated_line = original_line.split('record_key("')[0] + f'record_key("{new_substation_name}")\n'
+                            lines[substation_line_index] = updated_line
 
-                # Ghi nội dung đã chỉnh sửa vào file .ddl mới
-                with open(output_file_path, 'w') as file:
-                    file.writelines(lines)
+            # Ghi nội dung đã chỉnh sửa vào file .ddl mới
+            with open(output_file_path, 'w') as file:
+                file.writelines(lines)
 
-                files_processed.append(input_filename)
-                processed_files_count += 1
-                smooth_progress_bar(processed_files_count)
+            files_processed.append(input_filename)
+            processed_files_count += 1
+            smooth_progress_bar(processed_files_count)
 
         log_message("Đã xử lý xong tất cả các file.")
 
